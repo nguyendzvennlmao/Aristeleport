@@ -1,0 +1,47 @@
+teleport-delay: 5
+
+settings:
+  use-chat: true
+  use-actionbar: true
+
+sounds:
+  countdown: "BLOCK_NOTE_BLOCK_PLING"
+  success: "ENTITY_ENDERMAN_TELEPORT"
+  cancel: "ENTITY_VILLAGER_NO"
+
+messages:
+  spawn:
+    set: "&#facc15Đã đặt Spawn số &f%name% &#facc15thành công!"
+    delete: "&#ff0812Đã xóa Spawn số &f%name%!"
+    countdown: "&#facc15Dịch chuyển tới &fSpawn &#facc15trong &f%time%s"
+    success: "&#facc15Đã dịch chuyển tới Spawn!"
+    not-set: "&#ff0812Chưa có điểm Spawn nào được thiết lập (1-10)!"
+  afk:
+    set: "&#facc15Đã đặt AFK số &f%name% &#facc15thành công!"
+    delete: "&#ff0812Đã xóa AFK số &f%name%!"
+    countdown: "&#facc15Dịch chuyển tới khu &fAFK &#facc15trong &f%time%s"
+    success: "&#facc15Đã vào khu vực AFK!"
+    not-set: "&#ff0812Chưa có điểm AFK nào được thiết lập (1-10)!"
+  warp:
+    set: "&#facc15Đã tạo Warp &f%name% &#facc15thành công!"
+    delete: "&#ff0812Đã xóa Warp &f%name%!"
+    usage: "&#facc15Sử dụng: &f/warp %list%"
+    countdown: "&#facc15Dịch chuyển tới Warp &f%name% &#facc15trong &f%time%s"
+    success: "&#facc15Đã đến Warp %name%!"
+    not-set: "&#ff0812Warp %name% không tồn tại!"
+  global:
+    cancelled: "&#ff0812Bạn đã di chuyển! Dịch chuyển bị hủy."
+    no-permission: "&#ff0812Bạn không có quyền thực hiện lệnh này!"
+    reload: "&#facc15Plugin ArisTeleport đã reload thành công!"
+    help:
+      - "&b--- &#facc15ArisTeleport Help &b---"
+      - "&#facc15/spawn &7- Dịch chuyển random tới Spawn 1-10"
+      - "&#facc15/afk &7- Dịch chuyển random tới AFK 1-10"
+      - "&#facc15/warp <tên> &7- Dịch chuyển tới Warp đã set"
+      - "&#ff0812/setspawn <1-10> &7- Đặt vị trí Spawn"
+      - "&#ff0812/delspawn <1-10> &7- Xóa vị trí Spawn"
+      - "&#ff0812/setafk <1-10> &7- Đặt vị trí AFK"
+      - "&#ff0812/delafk <1-10> &7- Xóa vị trí AFK"
+      - "&#ff0812/setwarp <tên> &7- Đặt vị trí Warp"
+      - "&#ff0812/delwarp <tên> &7- Xóa vị trí Warp"
+      - "&#ff0812/aristeleport reload &7- Tải lại cấu chỉnh"
