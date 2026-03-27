@@ -1,0 +1,2 @@
+# Aristeleport
+Spawn afk warp
