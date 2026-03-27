@@ -1,0 +1,28 @@
+name: ArisTeleport
+version: '1.0'
+main: me.aris.aristeleport.ArisTeleport
+api-version: '1.20'
+author: VennLMAO
+folia-supported: true
+commands:
+  spawn:
+    description: Teleport to a random spawn.
+  setspawn:
+    permission: aristeleport.admin
+  delspawn:
+    permission: aristeleport.admin
+  afk:
+    description: Teleport to a random afk spot.
+  setafk:
+    permission: aristeleport.admin
+  delafk:
+    permission: aristeleport.admin
+  warp:
+    description: Teleport to a warp.
+  setwarp:
+    permission: aristeleport.admin
+  delwarp:
+    permission: aristeleport.admin
+  aristeleport:
+    permission: aristeleport.admin
+    aliases: [atp]
