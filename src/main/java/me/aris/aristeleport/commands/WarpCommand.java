@@ -17,6 +17,7 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) return true;
         Player p = (Player) sender;
+
         if (label.equalsIgnoreCase("setwarp")) {
             if (!p.hasPermission("aristeleport.admin")) {
                 p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.global.no-permission")));
@@ -27,6 +28,7 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
             p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.warp.set").replace("%name%", args[0])));
             return true;
         }
+
         if (label.equalsIgnoreCase("delwarp")) {
             if (!p.hasPermission("aristeleport.admin")) {
                 p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.global.no-permission")));
@@ -37,17 +39,20 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
             p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.warp.delete").replace("%name%", args[0])));
             return true;
         }
+
         if (args.length == 0) {
             var section = plugin.getLocationManager().getConfig().getConfigurationSection("warps");
             String list = (section == null) ? "" : String.join(", ", section.getKeys(false));
             p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.warp.usage").replace("%list%", list)));
             return true;
         }
+
         Location loc = plugin.getLocationManager().getLocation("warps." + args[0]);
         if (loc == null) {
             p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.warp.not-set").replace("%name%", args[0])));
             return true;
         }
+
         plugin.getTeleportListener().startTeleport(p, loc, "warp", args[0]);
         return true;
     }
@@ -58,12 +63,13 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
             var section = plugin.getLocationManager().getConfig().getConfigurationSection("warps");
             if (section != null) {
                 List<String> suggestions = new ArrayList<>();
+                String input = args[0].toLowerCase();
                 for (String key : section.getKeys(false)) {
-                    if (key.toLowerCase().startsWith(args[0].toLowerCase())) suggestions.add(key);
+                    if (key.toLowerCase().startsWith(input)) suggestions.add(key);
                 }
                 return suggestions;
             }
         }
         return Collections.emptyList();
     }
-}
+        }
