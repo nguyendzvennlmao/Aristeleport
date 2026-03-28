@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -40,6 +41,11 @@ public class TeleportListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        cancelTask(e.getPlayer().getUniqueId());
+    }
+
     private void cancelTask(UUID uuid) {
         Object task = tasks.remove(uuid);
         if (task != null) {
@@ -52,7 +58,7 @@ public class TeleportListener implements Listener {
     }
 
     public void startTeleport(Player p, Location loc, String type, String warpName) {
-        if (tasks.containsKey(p.getUniqueId())) return;
+        if (tasks.containsKey(p.getUniqueId()) || loc == null) return;
         int delay = plugin.getConfig().getInt("teleport-delay");
 
         if (isFolia) {
@@ -63,9 +69,13 @@ public class TeleportListener implements Listener {
                     doNotify(p, type, warpName, remaining);
                     tick[0]++;
                 } else {
-                    p.teleport(loc);
-                    doSuccess(p, type, warpName);
                     cancelTask(p.getUniqueId());
+                    p.getScheduler().run(plugin, (st) -> {
+                        if (p.isOnline()) {
+                            p.teleport(loc);
+                            doSuccess(p, type, warpName);
+                        }
+                    }, null);
                 }
             }, 1L, 20L);
             tasks.put(p.getUniqueId(), scheduledTask);
@@ -80,8 +90,10 @@ public class TeleportListener implements Listener {
                         doNotify(p, type, warpName, remaining);
                         tick++;
                     } else {
-                        p.teleport(loc);
-                        doSuccess(p, type, warpName);
+                        if (p.isOnline()) {
+                            p.teleport(loc);
+                            doSuccess(p, type, warpName);
+                        }
                         tasks.remove(p.getUniqueId());
                         this.cancel();
                     }
@@ -94,14 +106,22 @@ public class TeleportListener implements Listener {
     private void doNotify(Player p, String type, String warpName, int time) {
         String raw = plugin.getConfig().getString("messages." + type + ".countdown")
                 .replace("%name%", warpName).replace("%time%", String.valueOf(time));
-        sendNotify(p, color(raw));
-        p.playSound(p.getLocation(), Sound.valueOf(plugin.getConfig().getString("sounds.countdown")), 1.0f, 1.0f);
+        p.getScheduler().run(plugin, (st) -> {
+            if (p.isOnline()) {
+                sendNotify(p, color(raw));
+                p.playSound(p.getLocation(), Sound.valueOf(plugin.getConfig().getString("sounds.countdown")), 1.0f, 1.0f);
+            }
+        }, null);
     }
 
     private void doSuccess(Player p, String type, String warpName) {
         String rawSuccess = plugin.getConfig().getString("messages." + type + ".success").replace("%name%", warpName);
-        sendNotify(p, color(rawSuccess));
-        p.playSound(p.getLocation(), Sound.valueOf(plugin.getConfig().getString("sounds.success")), 1.0f, 1.0f);
+        p.getScheduler().run(plugin, (st) -> {
+            if (p.isOnline()) {
+                sendNotify(p, color(rawSuccess));
+                p.playSound(p.getLocation(), Sound.valueOf(plugin.getConfig().getString("sounds.success")), 1.0f, 1.0f);
+            }
+        }, null);
     }
 
     private void sendNotify(Player p, String msg) {
@@ -112,11 +132,12 @@ public class TeleportListener implements Listener {
     }
 
     public String color(String message) {
+        if (message == null) return "";
         Matcher matcher = hexPattern.matcher(message);
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         while (matcher.find()) {
             matcher.appendReplacement(buffer, net.md_5.bungee.api.ChatColor.of("#" + matcher.group(1)).toString());
         }
         return ChatColor.translateAlternateColorCodes('&', matcher.appendTail(buffer).toString());
     }
-          }
+        }
