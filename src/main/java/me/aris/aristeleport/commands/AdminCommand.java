@@ -25,4 +25,4 @@ public class AdminCommand implements CommandExecutor {
         }
         return true;
     }
-            }
+}
