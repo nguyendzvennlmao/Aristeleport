@@ -41,4 +41,4 @@ public class LocationManager {
     }
 
     public FileConfiguration getConfig() { return config; }
-    }
+                             }
