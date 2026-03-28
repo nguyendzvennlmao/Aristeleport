@@ -6,23 +6,30 @@ author: VennLMAO
 folia-supported: true
 commands:
   spawn:
-    description: Teleport to a random spawn.
+    description: Teleport to a random spawn point.
   setspawn:
+    description: Set a spawn point (1-10).
     permission: aristeleport.admin
   delspawn:
+    description: Delete a spawn point (1-10).
     permission: aristeleport.admin
   afk:
     description: Teleport to a random afk spot.
   setafk:
+    description: Set an afk spot (1-10).
     permission: aristeleport.admin
   delafk:
+    description: Delete an afk spot (1-10).
     permission: aristeleport.admin
   warp:
     description: Teleport to a warp.
   setwarp:
+    description: Set a warp.
     permission: aristeleport.admin
   delwarp:
+    description: Delete a warp.
     permission: aristeleport.admin
   aristeleport:
+    description: Admin commands.
     permission: aristeleport.admin
     aliases: [atp]
