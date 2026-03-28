@@ -43,7 +43,13 @@ public class AFKCommand implements CommandExecutor {
         }
         List<String> keys = new ArrayList<>(section.getKeys(false));
         String randomKey = keys.get(new Random().nextInt(keys.size()));
-        plugin.getTeleportListener().startTeleport(p, plugin.getLocationManager().getLocation("afk." + randomKey), "afk", "AFK");
+        Location loc = plugin.getLocationManager().getLocation("afk." + randomKey);
+        if (loc == null) {
+            plugin.getLocationManager().removeLocation("afk." + randomKey);
+            p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.afk.not-set")));
+            return true;
+        }
+        plugin.getTeleportListener().startTeleport(p, loc, "afk", "AFK");
         return true;
     }
-          }
+                }
