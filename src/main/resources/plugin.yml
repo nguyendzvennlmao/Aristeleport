@@ -6,30 +6,45 @@ author: VennLMAO
 folia-supported: true
 commands:
   spawn:
-    description: Teleport to a random spawn point.
+    description: Dịch chuyển ngẫu nhiên tới các điểm Spawn đã thiết lập.
+    usage: /spawn
   setspawn:
-    description: Set a spawn point (1-10).
+    description: Thiết lập điểm Spawn (Ví dụ /setspawn 1).
     permission: aristeleport.admin
+    usage: /setspawn <1-10>
   delspawn:
-    description: Delete a spawn point (1-10).
+    description: Xóa một điểm Spawn đã thiết lập.
     permission: aristeleport.admin
+    usage: /delspawn <1-10>
   afk:
-    description: Teleport to a random afk spot.
+    description: Dịch chuyển ngẫu nhiên tới khu vực AFK.
+    usage: /afk
   setafk:
-    description: Set an afk spot (1-10).
+    description: Thiết lập điểm AFK (Ví dụ /setafk 1).
     permission: aristeleport.admin
+    usage: /setafk <1-10>
   delafk:
-    description: Delete an afk spot (1-10).
+    description: Xóa một điểm AFK đã thiết lập.
     permission: aristeleport.admin
+    usage: /delafk <1-10>
   warp:
-    description: Teleport to a warp.
+    description: Dịch chuyển tới một Warp cụ thể.
+    usage: /warp <tên>
   setwarp:
-    description: Set a warp.
+    description: Tạo một điểm Warp mới tại vị trí đang đứng.
     permission: aristeleport.admin
+    usage: /setwarp <tên>
   delwarp:
-    description: Delete a warp.
+    description: Xóa một điểm Warp hiện có.
     permission: aristeleport.admin
+    usage: /delwarp <tên>
   aristeleport:
-    description: Admin commands.
+    description: Lệnh quản trị hệ thống ArisTeleport.
     permission: aristeleport.admin
     aliases: [atp]
+    usage: /atp reload
+
+permissions:
+  aristeleport.admin:
+    description: Cho phép sử dụng toàn bộ các lệnh quản trị của ArisTeleport.
+    default: op
