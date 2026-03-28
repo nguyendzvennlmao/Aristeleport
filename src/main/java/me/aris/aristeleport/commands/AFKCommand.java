@@ -16,6 +16,7 @@ public class AFKCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) return true;
         Player p = (Player) sender;
+
         if (label.equalsIgnoreCase("setafk")) {
             if (!p.hasPermission("aristeleport.admin")) {
                 p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.global.no-permission")));
@@ -26,6 +27,7 @@ public class AFKCommand implements CommandExecutor {
             p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.afk.set").replace("%name%", args[0])));
             return true;
         }
+
         if (label.equalsIgnoreCase("delafk")) {
             if (!p.hasPermission("aristeleport.admin")) {
                 p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.global.no-permission")));
@@ -36,20 +38,20 @@ public class AFKCommand implements CommandExecutor {
             p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.afk.delete").replace("%name%", args[0])));
             return true;
         }
+
         var section = plugin.getLocationManager().getConfig().getConfigurationSection("afk");
         if (section == null || section.getKeys(false).isEmpty()) {
             p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.afk.not-set")));
             return true;
         }
+
         List<String> keys = new ArrayList<>(section.getKeys(false));
         String randomKey = keys.get(new Random().nextInt(keys.size()));
         Location loc = plugin.getLocationManager().getLocation("afk." + randomKey);
-        if (loc == null) {
-            plugin.getLocationManager().removeLocation("afk." + randomKey);
-            p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.afk.not-set")));
-            return true;
+
+        if (loc != null) {
+            plugin.getTeleportListener().startTeleport(p, loc, "afk", "AFK");
         }
-        plugin.getTeleportListener().startTeleport(p, loc, "afk", "AFK");
         return true;
     }
-                }
+                                                    }
