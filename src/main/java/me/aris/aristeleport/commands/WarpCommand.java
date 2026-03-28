@@ -56,8 +56,14 @@ public class WarpCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
         if (args.length == 1) {
             var section = plugin.getLocationManager().getConfig().getConfigurationSection("warps");
-            if (section != null) return new ArrayList<>(section.getKeys(false));
+            if (section != null) {
+                List<String> suggestions = new ArrayList<>();
+                for (String key : section.getKeys(false)) {
+                    if (key.toLowerCase().startsWith(args[0].toLowerCase())) suggestions.add(key);
+                }
+                return suggestions;
+            }
         }
         return Collections.emptyList();
     }
-                              }
+}
