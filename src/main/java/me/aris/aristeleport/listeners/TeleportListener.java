@@ -22,11 +22,9 @@ public class TeleportListener implements Listener {
     private final ArisTeleport plugin;
     public final Map<UUID, Object> tasks = new HashMap<>();
     private final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
-    private final boolean isFolia;
 
     public TeleportListener(ArisTeleport plugin) {
         this.plugin = plugin;
-        this.isFolia = Bukkit.getVersion().contains("Folia");
     }
 
     @EventHandler
@@ -48,96 +46,65 @@ public class TeleportListener implements Listener {
 
     private void cancelTask(UUID uuid) {
         Object task = tasks.remove(uuid);
-        if (task != null) {
-            if (isFolia) {
-                ((io.papermc.paper.threadedregions.scheduler.ScheduledTask) task).cancel();
-            } else {
-                ((org.bukkit.scheduler.BukkitTask) task).cancel();
-            }
+        if (task instanceof io.papermc.paper.threadedregions.scheduler.ScheduledTask) {
+            ((io.papermc.paper.threadedregions.scheduler.ScheduledTask) task).cancel();
         }
     }
 
     public void startTeleport(Player p, Location loc, String type, String warpName) {
         if (tasks.containsKey(p.getUniqueId()) || loc == null) return;
+        
         int delay = plugin.getConfig().getInt("teleport-delay");
+        final int[] remaining = {delay};
 
-        if (isFolia) {
-            final int[] tick = {0};
-            Object scheduledTask = Bukkit.getRegionScheduler().runAtFixedRate(plugin, p.getLocation(), (task) -> {
-                int remaining = delay - tick[0];
-                if (remaining > 0) {
-                    doNotify(p, type, warpName, remaining);
-                    tick[0]++;
-                } else {
-                    cancelTask(p.getUniqueId());
-                    p.getScheduler().run(plugin, (st) -> {
-                        if (p.isOnline()) {
-                            p.teleport(loc);
-                            doSuccess(p, type, warpName);
-                        }
-                    }, null);
-                }
-            }, 1L, 20L);
-            tasks.put(p.getUniqueId(), scheduledTask);
-        } else {
-            org.bukkit.scheduler.BukkitTask bukkitTask = new org.bukkit.scheduler.BukkitRunnable() {
-                int tick = 0;
-                @Override
-                public void run() {
-                    if (!tasks.containsKey(p.getUniqueId())) { this.cancel(); return; }
-                    int remaining = delay - tick;
-                    if (remaining > 0) {
-                        doNotify(p, type, warpName, remaining);
-                        tick++;
-                    } else {
-                        if (p.isOnline()) {
-                            p.teleport(loc);
-                            doSuccess(p, type, warpName);
-                        }
-                        tasks.remove(p.getUniqueId());
-                        this.cancel();
-                    }
-                }
-            }.runTaskTimer(plugin, 0L, 20L);
-            tasks.put(p.getUniqueId(), bukkitTask);
-        }
-    }
+        Object scheduledTask = Bukkit.getRegionScheduler().runAtFixedRate(plugin, p.getLocation(), (task) -> {
+            if (!p.isOnline()) {
+                task.cancel();
+                tasks.remove(p.getUniqueId());
+                return;
+            }
 
-    private void doNotify(Player p, String type, String warpName, int time) {
-        String raw = plugin.getConfig().getString("messages." + type + ".countdown")
-                .replace("%name%", warpName).replace("%time%", String.valueOf(time));
-        p.getScheduler().run(plugin, (st) -> {
-            if (p.isOnline()) {
-                sendNotify(p, color(raw));
+            if (remaining[0] > 0) {
+                String raw = plugin.getConfig().getString("messages." + type + ".countdown")
+                        .replace("%name%", warpName).replace("%time%", String.valueOf(remaining[0]));
+                String colored = color(raw);
+                
+                if (plugin.getConfig().getBoolean("settings.use-chat")) p.sendMessage(colored);
+                if (plugin.getConfig().getBoolean("settings.use-actionbar")) {
+                    p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(colored));
+                }
+                
                 p.playSound(p.getLocation(), Sound.valueOf(plugin.getConfig().getString("sounds.countdown")), 1.0f, 1.0f);
+                remaining[0]--;
+            } else {
+                task.cancel();
+                tasks.remove(p.getUniqueId());
+                
+                p.getScheduler().run(plugin, (st) -> {
+                    p.teleport(loc);
+                    String rawSuccess = plugin.getConfig().getString("messages." + type + ".success").replace("%name%", warpName);
+                    String coloredSuccess = color(rawSuccess);
+                    
+                    if (plugin.getConfig().getBoolean("settings.use-chat")) p.sendMessage(coloredSuccess);
+                    if (plugin.getConfig().getBoolean("settings.use-actionbar")) {
+                        p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(coloredSuccess));
+                    }
+                    
+                    p.playSound(p.getLocation(), Sound.valueOf(plugin.getConfig().getString("sounds.success")), 1.0f, 1.0f);
+                }, null);
             }
-        }, null);
-    }
+        }, 1L, 20L);
 
-    private void doSuccess(Player p, String type, String warpName) {
-        String rawSuccess = plugin.getConfig().getString("messages." + type + ".success").replace("%name%", warpName);
-        p.getScheduler().run(plugin, (st) -> {
-            if (p.isOnline()) {
-                sendNotify(p, color(rawSuccess));
-                p.playSound(p.getLocation(), Sound.valueOf(plugin.getConfig().getString("sounds.success")), 1.0f, 1.0f);
-            }
-        }, null);
-    }
-
-    private void sendNotify(Player p, String msg) {
-        if (plugin.getConfig().getBoolean("settings.use-chat")) p.sendMessage(msg);
-        if (plugin.getConfig().getBoolean("settings.use-actionbar")) {
-            p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(msg));
-        }
+        tasks.put(p.getUniqueId(), scheduledTask);
     }
 
     public String color(String message) {
         if (message == null) return "";
         Matcher matcher = hexPattern.matcher(message);
-        StringBuilder buffer = new StringBuilder();
+        StringBuffer buffer = new StringBuffer();
         while (matcher.find()) {
             matcher.appendReplacement(buffer, net.md_5.bungee.api.ChatColor.of("#" + matcher.group(1)).toString());
         }
         return ChatColor.translateAlternateColorCodes('&', matcher.appendTail(buffer).toString());
     }
-        }
+    }
