@@ -43,7 +43,13 @@ public class SpawnCommand implements CommandExecutor {
         }
         List<String> keys = new ArrayList<>(section.getKeys(false));
         String randomKey = keys.get(new Random().nextInt(keys.size()));
-        plugin.getTeleportListener().startTeleport(p, plugin.getLocationManager().getLocation("spawn." + randomKey), "spawn", "Spawn");
+        Location loc = plugin.getLocationManager().getLocation("spawn." + randomKey);
+        if (loc == null) {
+             plugin.getLocationManager().removeLocation("spawn." + randomKey);
+             p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.spawn.not-set")));
+             return true;
+        }
+        plugin.getTeleportListener().startTeleport(p, loc, "spawn", "Spawn");
         return true;
     }
-                                   }
+}
