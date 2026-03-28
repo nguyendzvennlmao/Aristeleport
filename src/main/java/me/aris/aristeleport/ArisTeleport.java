@@ -32,4 +32,4 @@ public class ArisTeleport extends JavaPlugin {
 
     public LocationManager getLocationManager() { return locationManager; }
     public TeleportListener getTeleportListener() { return teleportListener; }
-          }
+            }
