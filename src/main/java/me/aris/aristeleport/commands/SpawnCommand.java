@@ -16,7 +16,6 @@ public class SpawnCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player)) return true;
         Player p = (Player) sender;
-
         if (label.equalsIgnoreCase("setspawn")) {
             if (!p.hasPermission("aristeleport.admin")) {
                 p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.global.no-permission")));
@@ -27,7 +26,6 @@ public class SpawnCommand implements CommandExecutor {
             p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.spawn.set").replace("%name%", args[0])));
             return true;
         }
-
         if (label.equalsIgnoreCase("delspawn")) {
             if (!p.hasPermission("aristeleport.admin")) {
                 p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.global.no-permission")));
@@ -38,20 +36,17 @@ public class SpawnCommand implements CommandExecutor {
             p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.spawn.delete").replace("%name%", args[0])));
             return true;
         }
-
         var section = plugin.getLocationManager().getConfig().getConfigurationSection("spawn");
         if (section == null || section.getKeys(false).isEmpty()) {
             p.sendMessage(plugin.getTeleportListener().color(plugin.getConfig().getString("messages.spawn.not-set")));
             return true;
         }
-
         List<String> keys = new ArrayList<>(section.getKeys(false));
         String randomKey = keys.get(new Random().nextInt(keys.size()));
         Location loc = plugin.getLocationManager().getLocation("spawn." + randomKey);
-        
         if (loc != null) {
             plugin.getTeleportListener().startTeleport(p, loc, "spawn", "Spawn");
         }
         return true;
     }
-        }
+                              }
