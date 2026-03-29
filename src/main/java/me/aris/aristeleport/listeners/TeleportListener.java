@@ -31,9 +31,13 @@ public class TeleportListener implements Listener {
     public void onMove(PlayerMoveEvent e) {
         Player p = e.getPlayer();
         if (tasks.containsKey(p.getUniqueId())) {
-            if (e.getFrom().distance(e.getTo()) > 0.1) {
+            Location from = e.getFrom();
+            Location to = e.getTo();
+            if (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ()) {
                 cancelTask(p.getUniqueId());
-                p.sendMessage(color(plugin.getConfig().getString("messages.global.cancelled")));
+                String cancelMsg = color(plugin.getConfig().getString("messages.global.cancelled"));
+                p.sendMessage(cancelMsg);
+                p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(cancelMsg));
                 p.playSound(p.getLocation(), Sound.valueOf(plugin.getConfig().getString("sounds.cancel")), 1.0f, 1.0f);
             }
         }
@@ -69,9 +73,9 @@ public class TeleportListener implements Listener {
                         .replace("%name%", warpName).replace("%time%", String.valueOf(remaining[0]));
                 String colored = color(raw);
                 
-                if (plugin.getConfig().getBoolean("settings.use-chat")) p.sendMessage(colored);
-                if (plugin.getConfig().getBoolean("settings.use-actionbar")) {
-                    p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(colored));
+                p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(colored));
+                if (plugin.getConfig().getBoolean("settings.use-chat") && remaining[0] == delay) {
+                    p.sendMessage(colored);
                 }
                 
                 p.playSound(p.getLocation(), Sound.valueOf(plugin.getConfig().getString("sounds.countdown")), 1.0f, 1.0f);
@@ -81,16 +85,15 @@ public class TeleportListener implements Listener {
                 tasks.remove(p.getUniqueId());
                 
                 p.getScheduler().run(plugin, (st) -> {
-                    p.teleport(loc);
-                    String rawSuccess = plugin.getConfig().getString("messages." + type + ".success").replace("%name%", warpName);
-                    String coloredSuccess = color(rawSuccess);
-                    
-                    if (plugin.getConfig().getBoolean("settings.use-chat")) p.sendMessage(coloredSuccess);
-                    if (plugin.getConfig().getBoolean("settings.use-actionbar")) {
-                        p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(coloredSuccess));
-                    }
-                    
-                    p.playSound(p.getLocation(), Sound.valueOf(plugin.getConfig().getString("sounds.success")), 1.0f, 1.0f);
+                    p.teleportAsync(loc).thenAccept(success -> {
+                        if (success) {
+                            p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(""));
+                            String rawSuccess = plugin.getConfig().getString("messages." + type + ".success").replace("%name%", warpName);
+                            String coloredSuccess = color(rawSuccess);
+                            p.sendMessage(coloredSuccess);
+                            p.playSound(p.getLocation(), Sound.valueOf(plugin.getConfig().getString("sounds.success")), 1.0f, 1.0f);
+                        }
+                    });
                 }, null);
             }
         }, 1L, 20L);
@@ -107,4 +110,4 @@ public class TeleportListener implements Listener {
         }
         return ChatColor.translateAlternateColorCodes('&', matcher.appendTail(buffer).toString());
     }
-    }
+}
